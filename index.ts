@@ -30,7 +30,13 @@ import { test as rdfTest } from './test'
 
 const rdfModule = {
     blankNode: $rdf.blankNode,
-    literal: $rdf.literal,
+    literal: function(value: any, options={}) {
+        if ('datatype' in options) {
+            // @ts-expect-error:
+            return $rdf.literal(value, options.datatype)
+        }
+        return $rdf.literal(value)
+    },
     namedNode: $rdf.namedNode,
 
     isBlankNode: $rdf.isBlankNode,
