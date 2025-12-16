@@ -111,16 +111,17 @@ export class BG2CellML {
                         response = await pyodide.http.pyfetch(model_uri)
                         if response.ok:
                             model_source = await response.text()
-                            model = BondgraphModel(framework, 'http://localhost/models/bvc.ttl', model_source, debug=debug)
-                            if model.has_issues:
+                            bgrdf_model = framework.make_bondgraph_model('http://localhost/models/bvc.ttl', model_source, debug=debug)
+                            if bgrdf_model.has_issues:
                                 print('Issues loading Bondgraph Model:')
-                                show_issues(model.issues, debug)
+                                show_issues(bgrdf_model.issues, debug)
                                 no_issues = False
                             else:
                                 print('Model processed... 😊😊')
 
                     if no_issues:
-                        cellml = CellMLModel(model).to_xml()
+                        cellml_model = bgrdf_model.make_cellml_model()
+                        cellml = cellml_model.to_xml()
                         ##print(cellml)
                         print('😊 😊 😊')
                 `)
