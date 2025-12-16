@@ -19,6 +19,7 @@ limitations under the License.
 ******************************************************************************/
 
 import { type PyodideAPI } from '@pyodide/pyodide'
+import { type PyProxy } from "@pyodide/ffi.d.ts"
 
 import * as $rdf from '@editor/metadata/index'
 
@@ -67,21 +68,47 @@ const pythonPackages = [
 
 //==============================================================================
 
+const SETUP_FRAMEWORK = `
+import traceback
+from bg2cellml.bondgraph.framework import get_framework
+
+def show_issues(issues, debug=False):
+    for issue in issues:
+        if debug:
+            text = traceback.format_exception(issue)
+        else:
+            text = traceback.format_exception_only(issue)
+        print(''.join(text))
+
+framework = await get_framework()
+if framework.has_issues:
+    show_issues(framework.issues)
+`
+//==============================================================================
+
 let pyodide = globalThis.pyodide
 
-initialiseBondgraphFramework()
+let bg2cellmlGlobals: PyProxy
 
-async function initialiseBondgraphFramework() {
-    await navigator.locks.request("load-packages", async (lock) => {
-        await loadPackages()
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+sleep(0.1).then(async () => {
+    pyodide = globalThis.pyodide
+    await navigator.locks.request("initialise-framework", async (lock) => {
+        if (!globalThis.pyodideInitialised) {
+            pyodide.registerJsModule("oximock", rdfModule)
+            await pyodide.loadPackage(pythonPackages.map(pkg => `/pyodide/wheels/${pkg}`))
+            bg2cellmlGlobals = pyodide.globals.get("dict")()
+            globalThis.pyodideInitialised = true
+        }
+        if (!bg2cellmlGlobals.has('framework')) {
+            await pyodide.runPythonAsync(SETUP_FRAMEWORK, { globals: bg2cellmlGlobals })
+        }
+        console.log('Initialised BG-RDF framework 😊...')
     })
-}
-
-async function loadPackages() {
-    pyodide.registerJsModule("oximock", rdfModule)
-    await pyodide.loadPackage(pythonPackages.map(pkg => `/pyodide/wheels/${pkg}`))
-    console.log('Loaded Python packages...')
-}
+})
 
 //==============================================================================
 //==============================================================================
@@ -94,55 +121,29 @@ export async function rdfTest() {
 
 export async function bg2cellml() {
     await pyodide.runPythonAsync(`
-        import sys
-        import traceback
+import pyodide.http
 
-        import pyodide.http
+model_uri = '/models/bvc.ttl'
+response = await pyodide.http.pyfetch(model_uri)
+if response.ok:
+    debug = True
+    no_issues = True
 
-        import bg2cellml
-        from bg2cellml import BondgraphModel, CellMLModel
-        from bg2cellml.bondgraph.framework import get_framework
+    model_source = await response.text()
+    bgrdf_model = framework.make_bondgraph_model('http://localhost/models/bvc.ttl', model_source, debug=debug)
+    if bgrdf_model.has_issues:
+        print('Issues loading Bondgraph Model:')
+        show_issues(bgrdf_model.issues, debug)
+        no_issues = False
+    else:
+        print('Model processed... 😊😊')
 
-        model_uri = '/models/bvc.ttl'
-
-        def show_issues(issues, debug=False):
-            for issue in issues:
-                if debug:
-                    text = traceback.format_exception(issue)
-                else:
-                    text = traceback.format_exception_only(issue)
-                print(''.join(text))
-
-        print('bg2cellml:',  bg2cellml.__file__, bg2cellml.__version__)
-
-        debug = True
-        no_issues = True
-        framework = await get_framework()
-        if framework.has_issues:
-            print('Issues loading BG-RDF framework:')
-            show_issues(framework.issues, debug)
-            no_issues = False
-        else:
-            print('BG-RDF loaded... 😊')
-
-        if no_issues:
-            response = await pyodide.http.pyfetch(model_uri)
-            if response.ok:
-                model_source = await response.text()
-                bgrdf_model = framework.make_bondgraph_model('http://localhost/models/bvc.ttl', model_source, debug=debug)
-                if bgrdf_model.has_issues:
-                    print('Issues loading Bondgraph Model:')
-                    show_issues(bgrdf_model.issues, debug)
-                    no_issues = False
-                else:
-                    print('Model processed... 😊😊')
-
-        if no_issues:
-            cellml_model = bgrdf_model.make_cellml_model()
-            cellml = cellml_model.to_xml()
-            ##print(cellml)
-            print('😊 😊 😊')
-    `)
+    if no_issues:
+        cellml_model = bgrdf_model.make_cellml_model()
+        cellml = cellml_model.to_xml()
+        ##print(cellml)
+        print('😊 😊 😊')
+`, { globals: bg2cellmlGlobals })
 }
 
 //==============================================================================
