@@ -27,7 +27,6 @@ import type { PyProxy } from "@pyodide/ffi.d.ts"
 
 import * as $rdf from '@editor/metadata/index'
 
-import { getBgRdf } from './celldl'
 import { test as runTest } from './test'
 
 //==============================================================================
