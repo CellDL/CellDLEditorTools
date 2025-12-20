@@ -18,6 +18,9 @@ limitations under the License.
 
 ******************************************************************************/
 
+import type * as vue from 'vue'
+
+import type { PyodideAPI } from '@pyodide/pyodide'
 import type { PyProxy } from "@pyodide/ffi.d.ts"
 
 //==============================================================================
@@ -84,27 +87,24 @@ if framework.has_issues:
 
 //==============================================================================
 
-let pyodide = globalThis.pyodide
-
+let pyodide: PyodideAPI
 let bg2cellmlGlobals: PyProxy
 
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+export async function initialisePyodide(pyodideApi: PyodideAPI) {
+    pyodide = pyodideApi
+    if (globalThis.pyodideInitialised === undefined) {
+        pyodide.registerJsModule("oximock", rdfModule)
+        await pyodide.loadPackage(pythonPackages.map(pkg => `/python/wheels/${pkg}`), {
+            messageCallback: ((_: string) => { })       // Suppress loading messages
+        })
 
-sleep(0.1).then(async () => {
-    await navigator.locks.request("initialise-framework", async (lock) => {
-        pyodide = globalThis.pyodide
-        if (!globalThis.pyodideInitialised) {
-            pyodide.registerJsModule("oximock", rdfModule)
-            await pyodide.loadPackage(pythonPackages.map(pkg => `/pyodide/wheels/${pkg}`))
-            globalThis.pyodideInitialised = true
-        }
         bg2cellmlGlobals = pyodide.globals.get("dict")()
         await pyodide.runPythonAsync(SETUP_FRAMEWORK, { globals: bg2cellmlGlobals })
+
         console.log('Initialised BG-RDF framework 😊...')
-    })
-})
+        globalThis.pyodideInitialised = true
+    }
+}
 
 //==============================================================================
 //==============================================================================
