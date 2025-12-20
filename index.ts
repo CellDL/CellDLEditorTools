@@ -33,7 +33,7 @@ import { test as runTest } from './test'
 
 const rdfModule = {
     blankNode: $rdf.blankNode,
-    literal: (value: any, options={}) => {
+    literal: (value: string, options={}) => {
         if ('datatype' in options) {
             // @ts-expect-error:
             return $rdf.literal(value, options.datatype)
