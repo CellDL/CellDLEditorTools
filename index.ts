@@ -58,7 +58,7 @@ const rdfModule = {
 //==============================================================================
 
 const pythonPackages = [
-    'bg2cellml-0.8.3-py3-none-any.whl',
+    'bg2cellml-0.8.4-py3-none-any.whl',
     'flexcache-0.3-py3-none-any.whl',
     'flexparser-0.4-py3-none-any.whl',
     'lark-1.3.1-py3-none-any.whl',
@@ -85,7 +85,7 @@ def get_issues(issues, debug=False) -> list[str]:
         else:
             return traceback.format_exception_only(issue)
 
-framework = await get_framework()
+framework = await get_framework(base='${import.meta.env.BASE_URL}')
 if framework.has_issues:
     print(''.join(get_issues(framework.issues)))
 `
