@@ -38,13 +38,13 @@ export interface CellMLOutput {
 
 //==============================================================================
 
-export function initialisePython(status: (msg:string) => void) {
-    // Load Pyodide's WASM module
+// Load Pyodide's WASM module, our Python packages, and setup `bg2cellml`
+// conversion
 
+export function initialisePython(status: (msg:string) => void) {
     loadPyodide({
         indexURL: `${import.meta.env.BASE_URL}pyodide/`
     }).then(async (pyodide: PyodideAPI) => {
-        // Now initialise our Python packages and `bg2cellml` conversion
         await initialisePyodide(pyodide, status)
         status('')
     })
@@ -57,7 +57,6 @@ const rdfModule = {
     blankNode: $rdf.blankNode,
     literal: (value: string, options={}) => {
         if ('datatype' in options) {
-            // @ts-expect-error:
             return $rdf.literal(value, options.datatype)
         }
         return $rdf.literal(value)
