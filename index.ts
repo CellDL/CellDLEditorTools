@@ -20,6 +20,7 @@ limitations under the License.
 
 import type * as vue from 'vue'
 
+import { loadPyodide } from '@pyodide/pyodide.mjs'
 import type { PyodideAPI } from '@pyodide/pyodide'
 import type { PyProxy } from "@pyodide/ffi.d.ts"
 
@@ -35,6 +36,21 @@ export interface CellMLOutput {
     issues?: string[]
 }
 
+//==============================================================================
+
+export function initialisePython(status: (msg:string) => void) {
+    // Load Pyodide's WASM module
+
+    loadPyodide({
+        indexURL: `${import.meta.env.BASE_URL}pyodide/`
+    }).then(async (pyodide: PyodideAPI) => {
+        // Now initialise our Python packages and `bg2cellml` conversion
+        await initialisePyodide(pyodide, status)
+        status('')
+    })
+}
+
+//==============================================================================
 //==============================================================================
 
 const rdfModule = {
@@ -95,16 +111,16 @@ if framework.has_issues:
 let pyodide: PyodideAPI
 let bg2cellmlGlobals: PyProxy
 
-export async function initialisePyodide(pyodideApi: PyodideAPI, loadingMessage: vue.ref<string>) {
+async function initialisePyodide(pyodideApi: PyodideAPI, status: (msg:string) => void) {
     pyodide = pyodideApi
     if (globalThis.pyodideInitialised === undefined) {
         pyodide.registerJsModule("oximock", rdfModule)
-        loadingMessage.value = 'Loading Python packages'
+        status('Loading Python packages')
         await pyodide.loadPackage(pythonPackages.map(pkg => `${import.meta.env.BASE_URL}python/wheels/${pkg}`), {
             messageCallback: ((_: string) => { })       // Suppress loading messages
         })
 
-        loadingMessage.value = 'Loading RDF framework'
+        status('Loading RDF framework')
         bg2cellmlGlobals = pyodide.globals.get("dict")()
         await pyodide.runPythonAsync(SETUP_FRAMEWORK, { globals: bg2cellmlGlobals })
 
