@@ -107,12 +107,14 @@ if framework.has_issues:
 
 //==============================================================================
 
-let pyodide: PyodideAPI
+let pyodide: PyodideAPI|undefined
+let pyodideRegistered: boolean = false
+
 let bg2cellmlGlobals: PyProxy
 
 async function initialisePyodide(pyodideApi: PyodideAPI, status: (msg:string) => void) {
     pyodide = pyodideApi
-    if (globalThis.pyodideInitialised === undefined) {
+    if (!pyodideRegistered) {
         pyodide.registerJsModule("oximock", rdfModule)
         status('Loading Python packages')
         await pyodide.loadPackage(pythonPackages.map(pkg => `${import.meta.env.BASE_URL}python/wheels/${pkg}`), {
@@ -124,7 +126,7 @@ async function initialisePyodide(pyodideApi: PyodideAPI, status: (msg:string) =>
         await pyodide.runPythonAsync(SETUP_FRAMEWORK, { globals: bg2cellmlGlobals })
 
         console.log('Initialised BG-RDF framework 😊...')
-        globalThis.pyodideInitialised = true
+        pyodideRegistered = true
     }
 }
 
