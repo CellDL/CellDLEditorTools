@@ -94,11 +94,9 @@ import traceback
 from bg2cellml.bondgraph.framework import get_framework
 
 def get_issues(issues, debug=False) -> list[str]:
-    for issue in issues:
-        if debug:
-            return traceback.format_exception(issue)
-        else:
-            return traceback.format_exception_only(issue)
+    return [ traceback.format_exception(issue) if debug else issue.reason
+        for issue in issues
+    ]
 
 framework = await get_framework(base='${import.meta.env.BASE_URL}')
 if framework.has_issues:
