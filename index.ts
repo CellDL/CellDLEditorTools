@@ -20,9 +20,9 @@ limitations under the License.
 
 import type * as vue from 'vue'
 
-import { loadPyodide } from '@pyodide/pyodide.mjs'
-import type { PyodideAPI } from '@pyodide/pyodide'
-import type { PyProxy } from "@pyodide/ffi.d.ts"
+import { loadPyodide } from '@renderer/assets/pyodide/pyodide.mjs'
+import type { PyodideAPI } from '@renderer/assets/pyodide/pyodide'
+import type { PyProxy } from "@renderer/assets/pyodide/ffi.d.ts"
 
 //==============================================================================
 
@@ -41,9 +41,18 @@ export interface CellMLOutput {
 // Load Pyodide's WASM module, our Python packages, and setup `bg2cellml`
 // conversion
 
-export function initialisePython(status: (msg:string) => void) {
+// This results in Vite bundling these files...
+import pyodideAsmUrl from "@renderer/assets/pyodide/pyodide.asm.js?url"
+import pyodideWasmUrl from "@renderer/assets/pyodide/pyodide.asm.wasm?url"
+import stdlibUrl from "@renderer/assets/pyodide/python_stdlib.zip?url"
+import lockUrl from "@renderer/assets/pyodide/pyodide-lock.json?url"
+
+const parts = pyodideAsmUrl.split('/')
+const pyodideBase = parts.slice(0, -1).join('/')
+
+export async function initialisePython(status: (msg:string) => void) {
     loadPyodide({
-        indexURL: `${import.meta.env.BASE_URL}pyodide/`
+        indexURL: pyodideBase
     }).then(async (pyodide: PyodideAPI) => {
         await initialisePyodide(pyodide, status)
         status('')
@@ -72,20 +81,14 @@ const rdfModule = {
 
 //==============================================================================
 
-const pythonPackages = [
-    'bg2cellml-0.9.1-py3-none-any.whl',
-    'flexcache-0.3-py3-none-any.whl',
-    'flexparser-0.4-py3-none-any.whl',
-    'lark-1.3.1-py3-none-any.whl',
-    'lxml-6.0.2-cp313-cp313-pyodide_2025_0_wasm32.whl',
-    'mpmath-1.3.0-py3-none-any.whl',
-    'networkx-3.5-py3-none-any.whl',
-    'pint-0.25-py3-none-any.whl',
-    'platformdirs-4.5.0-py3-none-any.whl',
-    'sympy-1.14.0-py3-none-any.whl',
-    'typing_extensions-4.15.0-py3-none-any.whl',
-    'ucumvert-0.3.0-py3-none-any.whl',
-]
+const pythonWheelUrls = import.meta.glob('@renderer/assets/wheels/*.whl', {
+    query: '?url',
+    import: 'default',
+    eager: true
+})
+
+// @ts-expect-error: `import:` above will return a string
+const pythonPackages: string[] = [...Object.values(pythonWheelUrls)]
 
 //==============================================================================
 
@@ -103,6 +106,12 @@ if framework.has_issues:
     print(''.join(get_issues(framework.issues)))
 `
 
+const BG2CELLML_VERSION = `
+from bg2cellml import __version__
+
+__version__
+`
+
 //==============================================================================
 
 let pyodide: PyodideAPI|undefined
@@ -114,8 +123,9 @@ async function initialisePyodide(pyodideApi: PyodideAPI, status: (msg:string) =>
     pyodide = pyodideApi
     if (!pyodideRegistered) {
         pyodide.registerJsModule("oximock", rdfModule)
+
         status('Loading Python packages')
-        await pyodide.loadPackage(pythonPackages.map(pkg => `${import.meta.env.BASE_URL}python/wheels/${pkg}`), {
+        await pyodide.loadPackage(pythonPackages, {
             messageCallback: ((_: string) => { })       // Suppress loading messages
         })
 
@@ -123,7 +133,8 @@ async function initialisePyodide(pyodideApi: PyodideAPI, status: (msg:string) =>
         bg2cellmlGlobals = pyodide.globals.get("dict")()
         await pyodide.runPythonAsync(SETUP_FRAMEWORK, { globals: bg2cellmlGlobals })
 
-        console.log(`Initialised BG-RDF framework using ${pythonPackages[0]} 😊`)
+        const version = pyodide.runPython(BG2CELLML_VERSION)
+        console.log(`Initialised BG-RDF framework using bg2cellml ${version} 😊`)
         pyodideRegistered = true
     }
 }
