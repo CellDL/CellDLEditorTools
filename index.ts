@@ -123,7 +123,7 @@ async function initialisePyodide(pyodideApi: PyodideAPI, status: (msg:string) =>
         bg2cellmlGlobals = pyodide.globals.get("dict")()
         await pyodide.runPythonAsync(SETUP_FRAMEWORK, { globals: bg2cellmlGlobals })
 
-        console.log('Initialised BG-RDF framework 😊...')
+        console.log(`Initialised BG-RDF framework using ${pythonPackages[0]} 😊`)
         pyodideRegistered = true
     }
 }
