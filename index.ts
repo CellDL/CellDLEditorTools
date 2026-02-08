@@ -22,7 +22,7 @@ import type * as vue from 'vue'
 
 import { loadPyodide } from '@renderer/assets/pyodide/pyodide.mjs'
 import type { PyodideAPI } from '@renderer/assets/pyodide/pyodide'
-import type { PyProxy } from "@renderer/assets/pyodide/ffi.d.ts"
+import type { PyProxy } from "@renderer/assets/pyodide/ffi"
 
 //==============================================================================
 
@@ -35,6 +35,17 @@ export interface CellMLOutput {
     cellml?: string
     issues?: string[]
 }
+
+//==============================================================================
+
+const pythonWheelUrls = import.meta.glob('@renderer/assets/wheels/*.whl', {
+    query: '?url',
+    import: 'default',
+    eager: true
+})
+
+// @ts-expect-error: `import:` above will return a string
+const pythonPackages: string[] = [...Object.values(pythonWheelUrls)]
 
 //==============================================================================
 
@@ -79,17 +90,6 @@ const rdfModule = {
 
     RdfStore: (): $rdf.RdfStore => new $rdf.RdfStore()
 }
-
-//==============================================================================
-
-const pythonWheelUrls = import.meta.glob('@renderer/assets/wheels/*.whl', {
-    query: '?url',
-    import: 'default',
-    eager: true
-})
-
-// @ts-expect-error: `import:` above will return a string
-const pythonPackages: string[] = [...Object.values(pythonWheelUrls)]
 
 //==============================================================================
 
