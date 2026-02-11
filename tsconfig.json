@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "composite": true,
+        "lib": ["dom", "esnext"],
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "noEmit": false,
+        "strictNullChecks": true,
+        "resolveJsonModule": true,
+        "target": "esnext",
+        "types": ["vite/client"]
+    },
+    "include": ["**/*.js", "**/*.ts", "package.json"]
+}

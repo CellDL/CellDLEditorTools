@@ -1,0 +1,50 @@
+{
+    "name": "@celldl/editor-tools",
+    "version": "0.20260211.1",
+    "author": {
+        "name": "David Brooks",
+        "email": "d.brooks@auckland.ac.nz"
+    },
+    "bugs": {
+        "url": "https://github.com/CellDL/CellDLEditorTools/issues"
+    },
+    "description": "Python tools for the CellDL Editor",
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE.txt"
+    ],
+    "keywords": [
+        "bg-rdf",
+        "celldl",
+        "python"
+    ],
+    "license": "Apache-2.0",
+    "module": "dist/CellDLEditorTools.es.js",
+    "productName": "CellDLEditorTools",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/CellDL/CellDLEditorTools.git"
+    },
+    "type": "module",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": "./dist/CellDLEditorTools.es.js",
+        "./bg-rdf/**": "./dist/bg-rdf/*",
+        "./wheels/*.whl": "./dist/wheels/*.whl"
+    },
+    "scripts": {
+        "build:lib": "vite build --config vite.lib.config.ts",
+        "clean": "bun scripts/clean.js",
+        "format": "bunx --bun biome format --fix --max-diagnostics=none",
+        "format:check": "bunx --bun biome format --max-diagnostics=none",
+        "lint": "bunx --bun biome lint --fix --error-on-warnings --max-diagnostics=none",
+        "postinstall": "bash ./scripts/postinstall.sh"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.3.11",
+        "@types/node": "^25.0.9",
+        "isomorphic-fetch": "^3.0.0",
+        "pyodide": "^0.29.3"
+    }
+}
