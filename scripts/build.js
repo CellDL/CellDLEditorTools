@@ -15,7 +15,7 @@ import { build } from 'tsup'
 const packageCacheDir = './cache'
 const versionInfoPath = `${packageCacheDir}/PYODIDE_VERSION`
 
-const entries = ['index', 'web', 'vite']
+const entries = ['node', 'web', 'vite']
 
 const wheelDir = './wheels'
 const wheelFiles = fs.readdirSync(wheelDir).filter(name => name.endsWith('.whl'))
@@ -235,7 +235,7 @@ loadPyodide({ packageCacheDir })
     await build({
       ...commonConfig,
       entry: [
-        'src/index.ts'
+        'src/pyodide/node.ts'
       ],
       minify: true,
       plugins: [nodePlugin],
@@ -244,7 +244,7 @@ loadPyodide({ packageCacheDir })
     await build({
       ...commonConfig,
       entry: [
-        'src/web.ts',
+        'src/pyodide/web.ts',
       ],
       minify: true,
       shims: false,
