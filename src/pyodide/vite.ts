@@ -21,8 +21,8 @@ const packageName: string = packageJson.name
 declare const __ASSETS__: string[]
 
 export const assetsKey = {
-  brotli: '$brotli',
-  fonttools: '$fonttools',
+//  brotli: '$brotli',
+//  fonttools: '$fonttools',
   wasm: '$wasm',
   asmjs: '$asmjs',
   zip: '$zip',
@@ -40,7 +40,7 @@ export interface PyodidePluginOptions {
    * Custom URL for assets.
    *
    * There are 6 assets that the plugin handled:
-   * - 2 `.whl` file: For `fonttools` and `brotli`(for `woff2`)
+//   * - 2 `.whl` file: For `fonttools` and `brotli`(for `woff2`)
    * - 1 lock file: Load `.whl`
    * - 1 asm.js file: EMScript generated file
    * - 1 asm.wasm file: EMScript generated file
@@ -116,12 +116,14 @@ export function pyodidePlugin(options: PyodidePluginOptions = {}): Plugin[] {
         for (const fileName of __ASSETS__) {
           let key: AssetsKey | undefined
           switch (true) {
+/*
             case fileName.startsWith('brotli'):
               key = assetsKey.brotli
               break
             case fileName.startsWith('fonttools'):
               key = assetsKey.fonttools
               break
+*/
             case fileName.includes('web.asm'):
               key = assetsKey.asmjs
               break
@@ -178,6 +180,9 @@ export function pyodidePlugin(options: PyodidePluginOptions = {}): Plugin[] {
           const [importerPath, importerCode] = importer
           const [lockFilePath, lockFileSource] = finalAssetsPathMap.get(assetsKey.lock)!
           const json = JSON.parse(lockFileSource as string)
+
+/*
+
           json.packages.brotli.file_name = customURL(
             assetsKey.brotli,
             assetsNameMap,
@@ -190,6 +195,9 @@ export function pyodidePlugin(options: PyodidePluginOptions = {}): Plugin[] {
             finalAssetsPathMap,
             importer,
           )
+
+*/
+
           const lockFileFinalPath = path.join(outputDir, lockFilePath)
           fs.writeFileSync(lockFileFinalPath, JSON.stringify(json))
           logger.info(`Update lock file: ${lockFileFinalPath}`, { timestamp: true })
