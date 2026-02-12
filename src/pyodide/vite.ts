@@ -29,11 +29,13 @@ export const assetsKey = {
   lock: '$lock',
 } as const
 
-const logger = createLogger('info', { prefix: '[fonttools]' })
+const logger = createLogger('info', { prefix: '[pyodide]' })
 
 export type AssetsKey = typeof assetsKey[keyof typeof assetsKey]
 
-export interface FonttoolsPluginOptions {
+type FinalAssetsMap = Map<AssetsKey, [path: string, source: string | Uint8Array]>
+
+export interface PyodidePluginOptions {
   /**
    * Custom URL for assets.
    *
@@ -64,7 +66,7 @@ export interface FonttoolsPluginOptions {
   customURL?: (
     currentAssetsKey: AssetsKey,
     assetsNameMap: Map<AssetsKey, string>,
-    finalAssetsPathMap: Map<AssetsKey, [path: string, source: string | Uint8Array]>,
+    finalAssetsPathMap: FinalAssetsMap,
     importer: [path: string, code: string]
   ) => string
   /**
@@ -74,21 +76,21 @@ export interface FonttoolsPluginOptions {
 }
 
 /**
- * Vite plugin for `@subframe7536/fonttools/web`, emit missing assets
+ * Vite plugin for `@celldl/editor-tools   `, emit missing assets
  */
-export function fonttools(options: FonttoolsPluginOptions = {}): Plugin[] {
+export function pyodidePlugin(options: PyodidePluginOptions = {}): Plugin[] {
   const {
-    customURL = (key, _, finalMap) => path.basename(finalMap.get(key)![0]),
+    customURL = (key:AssetsKey, _, finalMap: FinalAssetsMap) => path.basename(finalMap.get(key)![0]),
     transformAsmJs,
   } = options
-  const fonttoolsDistRoot = path.dirname(createRequire(import.meta.url).resolve('@subframe7536/fonttools'))
+  const distRoot = path.dirname(createRequire(import.meta.url).resolve('@celldl/editor-tools'))
   const assetsNameMap = new Map<AssetsKey, string>()
   const finalAssetsPathMap = new Map<AssetsKey, [path: string, source: string | Uint8Array]>()
   const importers: [path: string, code: string][] = []
   let outputDir = 'dist'
   return [
     {
-      name: 'vite-plugin-fonttools-exclude',
+      name: 'vite-plugin-pyodide-exclude',
       enforce: 'pre',
       config(config) {
         const optimizeDeps = config.optimizeDeps
@@ -107,7 +109,7 @@ export function fonttools(options: FonttoolsPluginOptions = {}): Plugin[] {
       }
     },
     {
-      name: 'vite-plugin-fonttools',
+      name: 'vite-plugin-pyodide',
       apply: 'build',
       enforce: 'post',
       buildStart() {
@@ -143,7 +145,7 @@ export function fonttools(options: FonttoolsPluginOptions = {}): Plugin[] {
             name: fileName,
             originalFileName: key,
             source: fs.readFileSync(
-              path.join(fonttoolsDistRoot, fileName),
+              path.join(distRoot, fileName),
               fileName.endsWith('.js') ? 'utf-8' : undefined,
             ),
           })
