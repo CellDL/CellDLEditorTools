@@ -15,6 +15,9 @@ import path from 'node:path'
 
 import { createLogger } from 'vite'
 
+import packageJson from '../../package.json'
+const packageName: string = packageJson.name
+
 declare const __ASSETS__: string[]
 
 export const assetsKey = {
@@ -88,8 +91,20 @@ export function fonttools(options: FonttoolsPluginOptions = {}): Plugin[] {
       name: 'vite-plugin-fonttools-exclude',
       enforce: 'pre',
       config(config) {
-        config.optimizeDeps?.exclude?.push('@subframe7536/fonttools')
-      },
+        const optimizeDeps = config.optimizeDeps
+        if (!optimizeDeps) {
+          config.optimizeDeps = {
+            exclude: [packageName]
+          }
+        } else {
+          const exclusions = optimizeDeps?.exclude
+          if (!exclusions) {
+            optimizeDeps.exclude = [packageName]
+          } else if (!exclusions.includes(packageName)) {
+            exclusions.push(packageName);
+          }
+        }
+      }
     },
     {
       name: 'vite-plugin-fonttools',
