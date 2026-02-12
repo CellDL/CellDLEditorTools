@@ -99,7 +99,7 @@ const commonConfig = {
 const nodePlugin = {
   name: 'fix pyodide in node',
   renderChunk(code, { path }) {
-    if (path.endsWith('index.js')) {
+    if (path.endsWith('node.js')) {
       return {
         code: code
           .replace(/typeof process\s*==\s*"object"\s*&&\s*typeof process.versions\s*==\s*"object"\s*&&\s*typeof process.versions.node\s*==\s*"string"\s*&&\s*!process.browser/, 'true')
