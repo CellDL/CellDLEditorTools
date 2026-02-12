@@ -16,6 +16,11 @@ const packageCacheDir = './cache'
 const versionInfoPath = `${packageCacheDir}/PYODIDE_VERSION`
 
 const entries = ['index', 'web', 'vite']
+
+const wheelDir = './wheels'
+const wheelFiles = fs.readdirSync(wheelDir).filter(name => name.endsWith('.whl'))
+const wheelNames = []
+
 const basicExports = Object.fromEntries(
   entries.map(k => [
     k === 'index' ? '.' : `./${k}`,
@@ -71,15 +76,10 @@ function copyCachedWhl(fileNames) {
  * @param {string[]} fileNames file names
  */
 function checkCachedWhl(fileNames) {
-  let count = 0
   for (const name of fileNames) {
-    if ((name.startsWith('brotli') || name.startsWith('fonttools')) && name.endsWith('.whl')) {
+    if (name.endsWith('.whl')) {
       extraAssetsExports[name] = `./dist/${name}`
-      count++
     }
-  }
-  if (fileNames.length < 3 || count < 2) {
-    throw new Error('No fonttools and brotli `.whl` file found')
   }
 }
 
@@ -191,13 +191,24 @@ loadPyodide({ packageCacheDir })
     console.log('target `pyodide` version:', api.version)
     return api
   })
-  .then(async api => (await api.loadPackage('brotli'), api))
-  .then(async api => (await api.loadPackage('fonttools'), api))
   .then((api) => {
     if (!fs.existsSync(packageCacheDir)) {
       fs.mkdirSync(packageCacheDir)
     }
     fs.writeFileSync(versionInfoPath, api.version, 'utf-8')
+    return api
+  })
+  .then(async api => {
+    for (const fileName of wheelFiles) {
+      const cachedPackageWheel = `${packageCacheDir}/${fileName}`
+      fs.access(cachedPackageWheel, fs.constants.F_OK, (_) => {
+        fs.cpSync(`${wheelDir}/${fileName}`, cachedPackageWheel)
+      })
+      const pkg = await api.loadPackage(cachedPackageWheel)
+      const name =  pkg[0].name
+      wheelNames.push(name)
+    }
+    return api
   })
   .then(async () => {
     const files = fs.readdirSync('./cache')
@@ -216,10 +227,7 @@ loadPyodide({ packageCacheDir })
         const json = JSON.parse(data)
         return JSON.stringify({
           ...json,
-          packages: {
-            brotli: json.packages.brotli,
-            fonttools: json.packages.fonttools,
-          },
+          packages: Object.fromEntries(wheelNames.map(name => [ name, json.packages[name] ]))
         })
       },
     )
