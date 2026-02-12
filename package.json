@@ -1,53 +1,92 @@
 {
-    "name": "@celldl/editor-tools",
-    "version": "0.20260211.1",
-    "author": {
-        "name": "David Brooks",
-        "email": "d.brooks@auckland.ac.nz"
+  "name": "@celldl/editor-tools",
+  "version": "0.20260213.0",
+  "author": {
+    "name": "David Brooks",
+    "email": "d.brooks@auckland.ac.nz"
+  },
+  "bugs": {
+    "url": "https://github.com/CellDL/CellDLEditorTools/issues"
+  },
+  "description": "Python tools for the CellDL Editor",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE.txt"
+  ],
+  "keywords": [
+    "bg-rdf",
+    "celldl",
+    "python"
+  ],
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "productName": "CellDLEditorTools",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CellDL/CellDLEditorTools.git"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
-    "bugs": {
-        "url": "https://github.com/CellDL/CellDLEditorTools/issues"
+    "./vite": {
+      "types": "./dist/vite.d.ts",
+      "import": "./dist/vite.js",
+      "default": "./dist/vite.js"
     },
-    "description": "Python tools for the CellDL Editor",
-    "files": [
-        "dist",
-        "README.md",
-        "LICENSE.txt"
-    ],
-    "keywords": [
-        "bg-rdf",
-        "celldl",
-        "python"
-    ],
-    "license": "Apache-2.0",
-    "module": "dist/CellDLEditorTools.es.js",
-    "productName": "CellDLEditorTools",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/CellDL/CellDLEditorTools.git"
-    },
-    "type": "module",
-    "types": "dist/index.d.ts",
-    "exports": {
-        ".": "./dist/CellDLEditorTools.es.js",
-        "./bg-rdf/**": "./dist/bg-rdf/*",
-        "./wheels/*.whl": "./dist/wheels/*.whl"
-    },
-    "scripts": {
-        "build:lib": "vite build --config vite.lib.config.ts",
-        "clean": "bun scripts/clean.js",
-        "format": "bunx --bun biome format --fix --max-diagnostics=none",
-        "format:check": "bunx --bun biome format --max-diagnostics=none",
-        "lint": "bunx --bun biome lint --fix --error-on-warnings --max-diagnostics=none",
-        "postinstall": "bash ./scripts/postinstall.sh"
-    },
-    "devDependencies": {
-        "@biomejs/biome": "^2.3.11",
-        "@types/node": "^25.0.9",
-        "pyodide": "^0.29.3",
-        "tsup": "^8.5.1",
-        "typescript": "^5.9.3",
-        "vite": "^7.2.7",
-        "ws": "^8.19.0"
+    "./pint-0.25-py3-none-any.whl": "./dist/pint-0.25-py3-none-any.whl",
+    "./lxml-6.0.2-cp313-cp313-pyodide_2025_0_wasm32.whl": "./dist/lxml-6.0.2-cp313-cp313-pyodide_2025_0_wasm32.whl",
+    "./mpmath-1.3.0-py3-none-any.whl": "./dist/mpmath-1.3.0-py3-none-any.whl",
+    "./flexparser-0.4-py3-none-any.whl": "./dist/flexparser-0.4-py3-none-any.whl",
+    "./networkx-3.5-py3-none-any.whl": "./dist/networkx-3.5-py3-none-any.whl",
+    "./sympy-1.14.0-py3-none-any.whl": "./dist/sympy-1.14.0-py3-none-any.whl",
+    "./flexcache-0.3-py3-none-any.whl": "./dist/flexcache-0.3-py3-none-any.whl",
+    "./lark-1.3.1-py3-none-any.whl": "./dist/lark-1.3.1-py3-none-any.whl",
+    "./bg2cellml-0.9.3-py3-none-any.whl": "./dist/bg2cellml-0.9.3-py3-none-any.whl",
+    "./platformdirs-4.5.0-py3-none-any.whl": "./dist/platformdirs-4.5.0-py3-none-any.whl",
+    "./typing_extensions-4.15.0-py3-none-any.whl": "./dist/typing_extensions-4.15.0-py3-none-any.whl",
+    "./ucumvert-0.3.0-py3-none-any.whl": "./dist/ucumvert-0.3.0-py3-none-any.whl",
+    "./pyodide.asm.wasm": "./dist/pyodide.asm.wasm",
+    "./python_stdlib.zip": "./dist/python_stdlib.zip",
+    "./pyodide.asm.js": "./dist/pyodide.asm.js",
+    "./pyodide-lock.json": "./dist/pyodide-lock.json",
+    "./pyodide.web.asm.js": "./dist/pyodide.web.asm.js"
+  },
+  "typesVersions": {
+    "*": {
+      "vite": [
+        "./dist/vite.d.ts"
+      ]
     }
+  },
+  "scripts": {
+    "build": "bun scripts/build.js",
+    "clean": "bun scripts/clean.js",
+    "format": "bunx --bun biome format --fix --max-diagnostics=none",
+    "format:check": "bunx --bun biome format --max-diagnostics=none",
+    "lint": "bunx --bun biome lint --fix --error-on-warnings --max-diagnostics=none",
+    "postinstall": "bash ./scripts/postinstall.sh"
+  },
+  "comment": "we don't want to distrubute 'postinstall' so need to remove and copy BG-RDF during build.js...",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.11",
+    "@types/node": "^25.0.9",
+    "adm-zip": "^0.5.16",
+    "pyodide": "^0.29.3",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.7"
+  }
 }
