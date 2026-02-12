@@ -278,7 +278,7 @@ loadPyodide({ packageCacheDir })
     await build({
       ...commonConfig,
       entry: [
-        'src/vite.ts',
+        'src/pyodide/vite.ts',
       ],
       define: {
         __ASSETS__: JSON.stringify(
