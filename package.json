@@ -86,7 +86,6 @@
     "format": "bunx --bun biome format --fix --max-diagnostics=none",
     "format:check": "bunx --bun biome format --max-diagnostics=none",
     "lint": "bunx --bun biome lint --fix --error-on-warnings --max-diagnostics=none",
-    "postinstall": "bash ./scripts/postinstall.sh"
   },
   "comment": "we don't want to distrubute 'postinstall' so need to remove and copy BG-RDF during build.js...",
   "publishConfig": {
