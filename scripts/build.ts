@@ -42,10 +42,7 @@ const wheelNames: string[] = []
 const extraAssetsExports: Record<string, string> = {}
 
 type Transform = (data: string) => string
-/**
- * @param {string} name name
- * @param {(data: string) => string} transform fn
- */
+
 function copyJsWithTransform(name: string, transform: Transform|undefined=undefined) {
   const data = fs.readFileSync(`./node_modules/pyodide/${name}`, 'utf-8')
   const content = transform ? transform(data) : data
@@ -54,27 +51,18 @@ function copyJsWithTransform(name: string, transform: Transform|undefined=undefi
   fs.writeFileSync(targetPath, content)
 }
 
-/**
- * @param {string} name name
- */
 function copyBinary(name: string) {
   const targetPath = `./dist/${name}`
   extraAssetsExports[name] = targetPath
   fs.cpSync(`./node_modules/pyodide/${name}`, targetPath)
 }
 
-/**
- * @param {string[]} fileNames file names
- */
 function copyCachedWhl(fileNames: string[]) {
   for (const name of fileNames) {
     fs.cpSync(`./cache/${name}`, `./dist/${name}`)
   }
 }
 
-/**
- * @param {string[]} fileNames file names
- */
 function checkCachedWhl(fileNames: string[]) {
   for (const name of fileNames) {
     if (name.endsWith('.whl')) {
