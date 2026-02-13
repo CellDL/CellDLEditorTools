@@ -15,12 +15,12 @@ import { build } from 'tsup'
 const packageCacheDir = './cache'
 const versionInfoPath = `${packageCacheDir}/PYODIDE_VERSION`
 
-const entries = ['node', 'web', 'vite']
 
 const wheelDir = './wheels'
 const wheelFiles = fs.readdirSync(wheelDir).filter(name => name.endsWith('.whl'))
 const wheelNames = []
 
+const entries = ['index', 'node', 'web', 'vite']
 const basicExports = Object.fromEntries(
   entries.map(k => [
     k === 'index' ? '.' : `./${k}`,
@@ -231,6 +231,13 @@ loadPyodide({ packageCacheDir })
         })
       },
     )
+
+    await build({
+      ...commonConfig,
+      entry: [
+        'src/index.ts'
+      ]
+    })
 
     await build({
       ...commonConfig,
