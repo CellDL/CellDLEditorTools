@@ -15,11 +15,6 @@ import { build } from 'tsup'
 const packageCacheDir = './cache'
 const versionInfoPath = `${packageCacheDir}/PYODIDE_VERSION`
 
-
-const wheelDir = './wheels'
-const wheelFiles = fs.readdirSync(wheelDir).filter(name => name.endsWith('.whl'))
-const wheelNames = []
-
 const entries = ['index', 'node', 'web', 'vite']
 const basicExports = Object.fromEntries(
   entries.map(k => [
@@ -39,6 +34,10 @@ const typesVersions = {
       .map(([k, v]) => [k.substring(2), [v.types]]),
   ),
 }
+
+const wheelDir = './wheels'
+const wheelFiles = fs.readdirSync(wheelDir).filter(name => name.endsWith('.whl'))
+const wheelNames = []
 
 const extraAssetsExports = {}
 
