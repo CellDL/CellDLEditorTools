@@ -1,5 +1,5 @@
 /**
- * From https://github.com/subframe7536/fonttools/blob/main/packages/fonttools/vite.js
+ * Based on https://github.com/subframe7536/fonttools/blob/main/packages/fonttools/vite.js
  *
  * MIT License
  *
@@ -15,21 +15,21 @@ import path from 'node:path'
 
 import { createLogger } from 'vite'
 
+const logger = createLogger('info', { prefix: '[pyodide]' })
+
 import packageJson from '../../package.json'
 const packageName: string = packageJson.name
 
+const pythonPackages: string[] = []
+
 declare const __ASSETS__: string[]
 
-export const assetsKey = {
-//  brotli: '$brotli',
-//  fonttools: '$fonttools',
+const assetsKey: Record<string, string> = {
   wasm: '$wasm',
   asmjs: '$asmjs',
   zip: '$zip',
   lock: '$lock',
-} as const
-
-const logger = createLogger('info', { prefix: '[pyodide]' })
+}
 
 export type AssetsKey = typeof assetsKey[keyof typeof assetsKey]
 
@@ -39,12 +39,12 @@ export interface PyodidePluginOptions {
   /**
    * Custom URL for assets.
    *
-   * There are 6 assets that the plugin handled:
-//   * - 2 `.whl` file: For `fonttools` and `brotli`(for `woff2`)
-   * - 1 lock file: Load `.whl`
-   * - 1 asm.js file: EMScript generated file
-   * - 1 asm.wasm file: EMScript generated file
-   * - 1 zip file: Python stdlibs
+   * The plugin handles:
+   * - `.whl` files: bunndled Python packages
+   * - lock file: Load `.whl` files
+   * - asm.js file: EMScript generated file
+   * - asm.wasm file: EMScript generated file
+   * - zip file: Python stdlibs
    *
    * And importer that use `loadInBrowser` imports lock file, asm.js, asm.wasm and zip file
    *
@@ -116,15 +116,14 @@ export function pyodidePlugin(options: PyodidePluginOptions = {}): Plugin[] {
         for (const fileName of __ASSETS__) {
           let key: AssetsKey | undefined
           switch (true) {
-/*
-            case fileName.startsWith('brotli'):
-              key = assetsKey.brotli
+            case fileName.endsWith('.whl'): {
+              const pythonPackage = fileName.split('-')[0]!.replace('_', '-')
+              key = `$${pythonPackage}`
+              assetsKey[pythonPackage] = key
+              pythonPackages.push(pythonPackage)
               break
-            case fileName.startsWith('fonttools'):
-              key = assetsKey.fonttools
-              break
-*/
-            case fileName.includes('web.asm'):
+            }
+           case fileName.includes('web.asm'):
               key = assetsKey.asmjs
               break
             case fileName.includes('wasm'):
@@ -180,24 +179,14 @@ export function pyodidePlugin(options: PyodidePluginOptions = {}): Plugin[] {
           const [importerPath, importerCode] = importer
           const [lockFilePath, lockFileSource] = finalAssetsPathMap.get(assetsKey.lock)!
           const json = JSON.parse(lockFileSource as string)
-
-/*
-
-          json.packages.brotli.file_name = customURL(
-            assetsKey.brotli,
-            assetsNameMap,
-            finalAssetsPathMap,
-            importer,
-          )
-          json.packages.fonttools.file_name = customURL(
-            assetsKey.fonttools,
-            assetsNameMap,
-            finalAssetsPathMap,
-            importer,
-          )
-
-*/
-
+          for (const pythonPackage of pythonPackages) {
+            json.packages[pythonPackage].file_name = customURL(
+              assetsKey[pythonPackage],
+              assetsNameMap,
+              finalAssetsPathMap,
+              importer,
+            )
+          }
           const lockFileFinalPath = path.join(outputDir, lockFilePath)
           fs.writeFileSync(lockFileFinalPath, JSON.stringify(json))
           logger.info(`Update lock file: ${lockFileFinalPath}`, { timestamp: true })
