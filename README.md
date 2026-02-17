@@ -62,7 +62,7 @@ export type { CellMLOutput } from '@celldl/editor-tools'
 const celldl: string = '<svg><!-- Valid CellDL --></svg>'
 const celldlUri: string = `https://celldl.org/cellml/${name}`   // Some URI to identify the source
 
-const cellmlObject: CellMLOutput = celldl2cellml(`https://celldl.org/cellml/${fileHandle.name}`, celldl)
+const cellmlObject: CellMLOutput = celldl2cellml(celldlUri, celldl)
 
 if (cellmlObject.cellml) {
     const cellml: string = cellmlObject.cellml
