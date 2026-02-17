@@ -1,6 +1,6 @@
 {
   "name": "@celldl/editor-tools",
-  "version": "0.20260214.0",
+  "version": "0.20260217.0",
   "author": {
     "name": "David Brooks",
     "email": "d.brooks@auckland.ac.nz"
@@ -82,9 +82,9 @@
     "./sympy-1.14.0-py3-none-any.whl": "./dist/sympy-1.14.0-py3-none-any.whl",
     "./flexcache-0.3-py3-none-any.whl": "./dist/flexcache-0.3-py3-none-any.whl",
     "./lark-1.3.1-py3-none-any.whl": "./dist/lark-1.3.1-py3-none-any.whl",
+    "./bg2cellml-0.10.1-py3-none-any.whl": "./dist/bg2cellml-0.10.1-py3-none-any.whl",
     "./platformdirs-4.5.0-py3-none-any.whl": "./dist/platformdirs-4.5.0-py3-none-any.whl",
     "./typing_extensions-4.15.0-py3-none-any.whl": "./dist/typing_extensions-4.15.0-py3-none-any.whl",
-    "./bg2cellml-0.10.1-py3-none-any.whl": "./dist/bg2cellml-0.10.1-py3-none-any.whl",
     "./ucumvert-0.3.0-py3-none-any.whl": "./dist/ucumvert-0.3.0-py3-none-any.whl",
     "./pyodide.asm.wasm": "./dist/pyodide.asm.wasm",
     "./python_stdlib.zip": "./dist/python_stdlib.zip",
