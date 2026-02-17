@@ -45,7 +45,7 @@ const typesVersions = {
 }
 
 const wheelDir = './wheels'
-const wheelFiles = fs.readdirSync(wheelDir).filter(name => name.endsWith('.whl'))
+const wheelFiles = fs.readdirSync(wheelDir).filter(name => name.endsWith('.whl')).sort()
 const lockFilePackages: Record<string, LockfilePackage> = {}
 
 const extraAssetsExports: Record<string, string> = {}
