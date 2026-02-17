@@ -91,16 +91,22 @@ export async function initialisePython(pyodideApi: PyodideAPI, rdfInterface: Rdf
 
         status('Loading Python packages', statusMsg)
         const pythonPackages = Object.keys(pyodideApi.lockfile.packages)
-        await pyodide.loadPackage(pythonPackages, {
-            messageCallback: ((_: string) => { })       // Suppress loading messages
-        })
+        const nPkgs = pythonPackages.length
+        let n = 1
+        for (const pkg of pythonPackages) {
+            status(`Loading package ${pkg} (${n}/${nPkgs})`, statusMsg)
+            await pyodide.loadPackage(pkg, {
+                messageCallback: ((_: string) => { })   // Suppress loading messages
+            })
+            n += 1
+        }
 
         status('Loading RDF framework', statusMsg)
         const rdfStatements = rdfInterface.getRdfStatements()
         const createFramework = pyodide.runPython(SETUP_FRAMEWORK)
         const issues: string[] = createFramework(rdfStatements)
         if (issues.length) {
-            status(`Issues loading BG-RDF: ${issues}`, statusMsg)
+            window.alert(`Issues loading BG-RDF: ${issues}`)
         }
 
         const version = pyodide.runPython(BG2CELLML_VERSION)
