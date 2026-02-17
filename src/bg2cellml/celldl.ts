@@ -1,8 +1,8 @@
 /******************************************************************************
 
-CellDL Editor
+CellDL Editor Tools
 
-Copyright (c) 2022 - 2025 David Brooks
+Copyright (c) 2022 - 2026 David Brooks
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,8 +18,9 @@ limitations under the License.
 
 ******************************************************************************/
 
-import { CELLDL_METADATA_ID } from '@editor/diagram/index'
-import { TurtleContentType } from '@renderer/metadata/index'
+const CELLDL_METADATA_ID = 'celldl-rdf-metadata'
+
+const TurtleContentType = 'text/turtle'
 
 //==============================================================================
 

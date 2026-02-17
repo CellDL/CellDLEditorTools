@@ -1,3 +1,4 @@
 // Export CellML generation tools
 
-export { initialisePython } from './bg2cellml'
+export { initialisePython, celldl2cellml } from './bg2cellml'
+export type { CellMLOutput } from './bg2cellml'

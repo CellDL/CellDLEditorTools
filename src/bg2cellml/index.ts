@@ -18,17 +18,14 @@ limitations under the License.
 
 ******************************************************************************/
 
-import { loadPyodide, type PyodideAPI } from 'pyodide'
-
-//import type { PyProxy } from "pyodide/ffi"
+import type { PyodideAPI } from 'pyodide'
+import type { PyProxy } from 'pyodide/ffi'
 
 //==============================================================================
 
-//import * as $rdf from '@renderer/metadata/index'
+import { getBgRdf } from './celldl'
 
-//import { getBgRdf } from './celldl'
-
-//import { test as runTest } from './test'
+import { test as runTest } from './test'
 
 export interface CellMLOutput {
     cellml?: string
@@ -36,65 +33,24 @@ export interface CellMLOutput {
 }
 
 //==============================================================================
-
-const pythonWheelUrls = import.meta.glob('./src/assets/wheels/*.whl', {
-    query: '?url',
-    import: 'default',
-    eager: true
-})
-
-// @ts-expect-error: `import:` above will return a string
-const pythonPackages: string[] = [...Object.values(pythonWheelUrls)]
-
-//==============================================================================
-
-export async function initialisePython(status: (msg:string) => void) {
-    status('Loading Python interpreter')
-    loadPyodide({
-//        indexURL: pyodideBase
-    }).then(async (pyodide: PyodideAPI) => {
-//        await initialisePyodide(pyodide, status)
-        console.log(pyodide)
-        status('')
-    })
-}
-
-//==============================================================================
-//==============================================================================
-
-/****
-
-const rdfModule = {
-    blankNode: $rdf.blankNode,
-    literal: (value: string, options={}) => {
-        if ('datatype' in options) {
-            return $rdf.literal(value, options.datatype)
-        }
-        return $rdf.literal(value)
-    },
-    namedNode: $rdf.namedNode,
-
-    isBlankNode: $rdf.isBlankNode,
-    isLiteral: $rdf.isLiteral,
-    isNamedNode: $rdf.isNamedNode,
-
-    RdfStore: (): $rdf.RdfStore => new $rdf.RdfStore()
-}
-
 //==============================================================================
 
 const SETUP_FRAMEWORK = `
 import traceback
-from bg2cellml.bondgraph.framework import get_framework
+from bg2cellml.bondgraph.framework import BondgraphFramework, framework_from_rdf
+from bg2cellml.rdf.types import Triple
 
 def get_issues(issues, debug=False) -> list[str]:
     return [ traceback.format_exception(issue) if debug else issue.reason
         for issue in issues
     ]
 
-framework = await get_framework(base='${import.meta.env.BASE_URL}')
-if framework.has_issues:
-    print(''.join(get_issues(framework.issues)))
+framework: BondgraphFramework|None = None
+
+def create_framework(statements: list[Triple]) -> list[str]:
+    global framework
+    framework = framework_from_rdf(statements)
+    return get_issues(framework.issues)
 `
 
 const BG2CELLML_VERSION = `
@@ -110,19 +66,43 @@ let pyodideRegistered: boolean = false
 
 let bg2cellmlGlobals: PyProxy
 
-async function initialisePyodide(pyodideApi: PyodideAPI, status: (msg:string) => void) {
+//==============================================================================
+//==============================================================================
+
+// import from @celldl/editor-types
+type RdfInterface = {
+    oximockRdfModule: object
+    getRdfStatements: () => []  // $rdf.Statement
+}
+
+function status(msg: string, statusMsg: ((msg:string) => void)|undefined) {
+    if (statusMsg) {
+        statusMsg(msg)
+    }
+}
+
+export async function initialisePython(pyodideApi: PyodideAPI, rdfInterface: RdfInterface,
+                                       statusMsg: ((msg:string) => void)|undefined=undefined) {
     pyodide = pyodideApi
     if (!pyodideRegistered) {
-        pyodide.registerJsModule("oximock", rdfModule)
+        pyodide.registerJsModule("oximock", rdfInterface.oximockRdfModule)
 
-        status('Loading Python packages')
+        status('Loading Python packages', statusMsg)
+        const pythonPackages = Object.keys(pyodideApi.lockfile.packages)
         await pyodide.loadPackage(pythonPackages, {
             messageCallback: ((_: string) => { })       // Suppress loading messages
         })
 
-        status('Loading RDF framework')
-        bg2cellmlGlobals = pyodide.globals.get("dict")()
+        status('Loading RDF framework', statusMsg)
+        const rdfStatements = rdfInterface.getRdfStatements()
+        bg2cellmlGlobals = pyodide.globals.get('dict')()
         await pyodide.runPythonAsync(SETUP_FRAMEWORK, { globals: bg2cellmlGlobals })
+
+        const createFramework = bg2cellmlGlobals.get('create_framework')
+        const issues: string[] = createFramework(rdfStatements)
+        if (issues.length) {
+            status(`Issues loading BG-RDF: ${issues}`, statusMsg)
+        }
 
         const version = pyodide.runPython(BG2CELLML_VERSION)
         console.log(`Initialised BG-RDF framework using bg2cellml ${version} 😊`)
@@ -147,17 +127,28 @@ def bg2cellml(uri: str, bg_rdf: str, debug: bool=False):
 
 bg2cellml
 `
+
 //==============================================================================
 
 function bg2cellml(uri: string, bgRdf: string, debug: boolean=false): CellMLOutput {
-    const bg2cellml = pyodide.runPython(RUN_BG2CELLML, { globals: bg2cellmlGlobals })
-    return bg2cellml(uri, bgRdf, debug)
+    if (pyodide) {
+        const bg2cellml = pyodide.runPython(RUN_BG2CELLML, { globals: bg2cellmlGlobals })
+        return bg2cellml(uri, bgRdf, debug)
+    }
+    return {
+        issues: ['CellML conversion service has not been initialised']
+    }
 }
 
 export function celldl2cellml(uri: string, celldl: string, debug: boolean=false): CellMLOutput {
-    const bgRdf = getBgRdf(celldl)
-    const bg2cellml = pyodide.runPython(RUN_BG2CELLML, { globals: bg2cellmlGlobals })
-    return bg2cellml(uri, bgRdf, debug)
+    if (pyodide) {
+        const bgRdf = getBgRdf(celldl)
+        const bg2cellml = pyodide.runPython(RUN_BG2CELLML, { globals: bg2cellmlGlobals })
+        return bg2cellml(uri, bgRdf, debug)
+    }
+    return {
+        issues: ['CellML conversion service has not been initialised']
+    }
 }
 
 export async function testBg2cellml(): Promise<CellMLOutput> {
@@ -180,10 +171,10 @@ export async function testBg2cellml(): Promise<CellMLOutput> {
 //==============================================================================
 
 export async function rdfTest() {
-    await runTest(pyodide)
+    if (pyodide) {
+        await runTest(pyodide)
+    }
 }
 
 //==============================================================================
 //==============================================================================
-
-***/
