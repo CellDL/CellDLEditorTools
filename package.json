@@ -17,6 +17,7 @@
   "keywords": [
     "bg-rdf",
     "celldl",
+    "pyodide",
     "python"
   ],
   "license": "Apache-2.0",
@@ -28,6 +29,30 @@
     "url": "git+https://github.com/CellDL/CellDLEditorTools.git"
   },
   "type": "module",
+  "scripts": {
+    "build": "bun scripts/build.js",
+    "clean": "bun scripts/clean.js",
+    "format": "bunx --bun biome format --fix --max-diagnostics=none",
+    "format:check": "bunx --bun biome format --max-diagnostics=none",
+    "lint": "bunx --bun biome lint --fix --error-on-warnings --max-diagnostics=none"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.11",
+    "@types/adm-zip": "^0.5.7",
+    "@types/node": "^25.0.9",
+    "adm-zip": "^0.5.16",
+    "pyodide": "^0.29.3",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.7"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -79,30 +104,5 @@
         "./dist/vite.d.ts"
       ]
     }
-  },
-  "scripts": {
-    "build": "bun scripts/build.js",
-    "clean": "bun scripts/clean.js",
-    "format": "bunx --bun biome format --fix --max-diagnostics=none",
-    "format:check": "bunx --bun biome format --max-diagnostics=none",
-    "lint": "bunx --bun biome lint --fix --error-on-warnings --max-diagnostics=none",
-  },
-  "comment": "we don't want to distrubute 'postinstall' so need to remove and copy BG-RDF during build.js...",
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
-  },
-  "dependencies": {
-    "ws": "^8.19.0"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.3.11",
-    "@types/adm-zip": "^0.5.7",
-    "@types/node": "^25.0.9",
-    "adm-zip": "^0.5.16",
-    "pyodide": "^0.29.3",
-    "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
-    "vite": "^7.2.7"
   }
 }
