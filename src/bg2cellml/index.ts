@@ -19,7 +19,6 @@ limitations under the License.
 ******************************************************************************/
 
 import type { PyodideAPI } from 'pyodide'
-import type { PyProxy } from 'pyodide/ffi'
 
 //==============================================================================
 
