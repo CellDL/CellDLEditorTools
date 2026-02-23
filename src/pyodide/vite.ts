@@ -76,14 +76,14 @@ export interface PyodidePluginOptions {
 }
 
 /**
- * Vite plugin for `@celldl/editor-tools   `, emit missing assets
+ * Vite plugin for `@celldl/editor-python-tools`, emit missing assets
  */
 export function pyodidePlugin(options: PyodidePluginOptions = {}): Plugin[] {
   const {
     customURL = (key:AssetsKey, _, finalMap: FinalAssetsMap) => path.basename(finalMap.get(key)![0]),
     transformAsmJs,
   } = options
-  const distRoot = path.dirname(createRequire(import.meta.url).resolve('@celldl/editor-tools'))
+  const distRoot = path.dirname(createRequire(import.meta.url).resolve('@celldl/editor-python-tools'))
   const assetsNameMap = new Map<AssetsKey, string>()
   const finalAssetsPathMap = new Map<AssetsKey, [path: string, source: string | Uint8Array]>()
   const importers: [path: string, code: string][] = []

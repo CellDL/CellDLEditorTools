@@ -1,4 +1,4 @@
-name: Publish the CellDL Editor Tools as a npm package
+name: Publish the CellDL Editor Python Tools as a npm package
 on:
   workflow_dispatch:
 
@@ -35,11 +35,11 @@ jobs:
       - name: Install bun
         run: npm install -g bun
 
-      - name: Build the CellDL Editor Tools
+      - name: Build the CellDL Editor Python Tools
         run: |
           bun install
           bun run build
 
-      - name: Publish the CellDL Editor on npm
+      - name: Publish the CellDL Editor Python Tools on npm
         run: |
           npm publish --access public --no-git-checks

@@ -1,12 +1,12 @@
 {
-  "name": "@celldl/editor-tools",
-  "version": "0.20260217.1",
+  "name": "@celldl/editor-python-tools",
+  "version": "0.20260224.0",
   "author": {
     "name": "David Brooks",
     "email": "d.brooks@auckland.ac.nz"
   },
   "bugs": {
-    "url": "https://github.com/CellDL/CellDLEditorTools/issues"
+    "url": "https://github.com/CellDL/CellDLEditorPythonTools/issues"
   },
   "description": "Python tools for the CellDL Editor",
   "files": [
@@ -23,10 +23,10 @@
   "license": "Apache-2.0",
   "main": "dist/index.js",
   "module": "dist/index.js",
-  "productName": "CellDLEditorTools",
+  "productName": "CellDLEditorPythonTools",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CellDL/CellDLEditorTools.git"
+    "url": "git+https://github.com/CellDL/CellDLEditorPythonTools.git"
   },
   "type": "module",
   "scripts": {
