@@ -10,7 +10,6 @@
 import { loadPyodide, type PyodideAPI } from 'pyodide'
 
 import type { LoadInNodeOption } from './types'
-export type { LoadInNodeOption } from './types'
 
 /**
  * Load `pyodide` in `node` using the loader wrapped for Vite

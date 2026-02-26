@@ -9,7 +9,6 @@
 import { loadPyodide, type PyodideAPI } from 'pyodide'
 
 import type { LoadInBrowserOption } from './types'
-export type { LoadInBrowserOption } from './types'
 
 /**
  * Load `pyodide` in the browser using the loader wrapped for Vite
