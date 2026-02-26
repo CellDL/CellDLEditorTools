@@ -249,8 +249,20 @@ loadPyodide({ packageCacheDir })
       fs.access(cachedPackageWheel, fs.constants.F_OK, (_) => {
         fs.cpSync(`${wheelDir}/${fileName}`, cachedPackageWheel)
       })
-      const pkgData: PackageData[] = await api.loadPackage(cachedPackageWheel)
-      await addCachedWheel(pkgData[0])
+      let retries = 0
+      while (retries < 3) {
+        const pkgData: PackageData[] = await api.loadPackage(cachedPackageWheel)
+        const pkg = pkgData[0]
+        if (pkg) {
+          await addCachedWheel(pkg)
+          break
+        }
+        console.log(`Retrying load of ${cachedPackageWheel}`)
+        retries += 1
+      }
+      if (retries >= 3) {
+        console.error(`Couldn't load ${cachedPackageWheel}...`)
+      }
     }
     return api
   })
